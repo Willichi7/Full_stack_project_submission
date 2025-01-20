@@ -33,7 +33,8 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newPhone, setNewPhone] = useState('')
   const [filter, setFilter] = useState('')
-  const [message , setMessage] = useState('')
+  const [message , setMessage] = useState(null)
+  const [type, setType] = useState(null);
 
   useEffect(() => {
     console.log('effect')
@@ -59,11 +60,16 @@ const App = () => {
         .update(existingPerson.id, changedPerson)
         .then(returnedPerson => {
           setPersons(persons.map(n => n.id === existingPerson.id ? returnedPerson : n ))
+          setMessage(
+            `${existingPerson.name} details are updated successfully`, 
+          )
+          setType('success')
         })
         .catch(error => {
           setMessage(
-            `Note '${existingPerson.name}' was already removed from server`
+            `${existingPerson.name} was already removed from server`, error
           )
+          setType('error')
           setTimeout(() => {
             setMessage(null)
           }, 5000)
@@ -82,13 +88,17 @@ const App = () => {
       .then(newPerson => {
         setPersons(persons.concat(newPerson))
         setMessage(`Added ${nameObject.name} `)
-        
+        setType('success')
         setTimeout(() => {
           setMessage(null)
          },5000)
         setNewName('')
         setNewPhone('')
          
+      }).catch(error => {
+        setMessage(error.response.data.error)
+        setType('error')
+        console.log(error.response.data.error)
       })
     }  
   }
@@ -124,7 +134,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      <Notification  message={message}/>
+      <Notification  message={message} type={type}/>
 
       <Filter filter={filter} onChange={handleFilterChange} />
 
